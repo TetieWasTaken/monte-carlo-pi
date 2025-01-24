@@ -8,9 +8,9 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+      fontFamily: {
+        sans: ["var(--contentFont)", "ui-sans-serif", "system-ui"],
+        title: ["var(--titleFont)", "ui-serif", "Georgia"],
       },
     },
   },
