@@ -11,11 +11,25 @@ const randomPoint = (): Point => {
   return { x, y, isInsideCircle };
 };
 
+const enum SimulationMode {
+  Simulate,
+  NoSimulate,
+  Automatic,
+}
+
+const SimulationModeLabels = {
+  [SimulationMode.Simulate]: "Simulate",
+  [SimulationMode.NoSimulate]: "Instant",
+  [SimulationMode.Automatic]: "Automatic",
+};
+
 export default function Home() {
   const [points, setPoints] = useState<Point[]>([]);
   const [iterations, setIterations] = useState(1000);
   const [simulationIterations, setSimulationIterations] = useState(0);
-  const [skipSimulation, setSkipSimulation] = useState(false);
+  const [simulationMode, setSimulationMode] = useState(
+    SimulationMode.Automatic,
+  );
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simulationId = useRef<number | null>(null);
@@ -27,7 +41,7 @@ export default function Home() {
     ctx.arc(
       x * 500,
       y * 500,
-      Math.max(2, Math.min(5, 5000 / simulationIterations)),
+      Math.max(1, Math.min(5, 4000 / simulationIterations)),
       0,
       2 * Math.PI,
     );
@@ -44,19 +58,13 @@ export default function Home() {
     const newPoints: Point[] = [];
     let i = 0;
 
-    if (skipSimulation) {
-      for (i = 0; i < iterations; i++) {
-        newPoints.push(randomPoint());
-      }
-      setPoints(newPoints);
-      if (canvasRef.current) {
-        const ctx = canvasRef.current.getContext("2d");
-        if (ctx) {
-          ctx.clearRect(0, 0, 500, 500);
-          newPoints.forEach((point) => drawPoint(ctx, point));
-        }
-      }
-    } else {
+    let runSimulation: boolean;
+    if (simulationMode === SimulationMode.Simulate) runSimulation = true;
+    else if (simulationMode === SimulationMode.NoSimulate) {
+      runSimulation = false;
+    } else runSimulation = iterations < 600;
+
+    if (runSimulation) {
       const simulate = () => {
         if (i < iterations) {
           const point = randomPoint();
@@ -73,6 +81,18 @@ export default function Home() {
         }
       };
       simulate();
+    } else {
+      for (i = 0; i < iterations; i++) {
+        newPoints.push(randomPoint());
+      }
+      setPoints(newPoints);
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, 500, 500);
+          newPoints.forEach((point) => drawPoint(ctx, point));
+        }
+      }
     }
   };
 
@@ -152,11 +172,47 @@ export default function Home() {
               }}
             />
           </p>
+          <p className="text-lg mt-4">
+            <span
+              className="text-white"
+              dangerouslySetInnerHTML={{
+                __html: katex.renderToString(
+                  `r = \\text{points inside circle}`,
+                  { throwOnError: false, displayMode: true, output: "mathml" },
+                ),
+              }}
+            />
+            <span
+              className="text-white"
+              dangerouslySetInnerHTML={{
+                __html: katex.renderToString(
+                  `n = \\text{total points}`,
+                  { throwOnError: false, displayMode: true, output: "mathml" },
+                ),
+              }}
+            />
+          </p>
+          <p className="text-lg mt-4">
+            <span className="text-white">
+              Difference:{" "}
+            </span>
+            <span
+              className={Math.abs(Math.PI - parseFloat(estimatedPi)) < 0.01
+                ? "text-[#7fff7f]"
+                : Math.abs(Math.PI - parseFloat(estimatedPi)) < 0.1
+                ? "text-[#ffff7f]"
+                : "text-[#ff7f7f]"}
+            >
+              {Math.abs(Math.PI - parseFloat(estimatedPi)).toPrecision(
+                points.length.toString().length,
+              )}
+            </span>
+          </p>
         </div>
       </div>
       <div className="mt-8">
         <button
-          className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none"
+          className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none mr-4"
           onClick={startSimulation}
         >
           Start
@@ -164,15 +220,17 @@ export default function Home() {
         <input
           type="number"
           placeholder="iterations (1000)"
-          className="m-4 mt-0 p-2 border border-gray-300 rounded bg-gray-800 text-white"
+          className="p-2 border border-gray-300 rounded bg-gray-800 text-white"
           value={iterations}
           onChange={(e) => setIterations(parseInt(e.target.value, 10))}
         />
         <button
-          className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none"
-          onClick={() => setSkipSimulation((prev) => !prev)}
+          className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none ml-4"
+          onClick={() => {
+            setSimulationMode((mode) => (mode + 1) % 3);
+          }}
         >
-          Skip
+          {SimulationModeLabels[simulationMode]}
         </button>
       </div>
     </div>
