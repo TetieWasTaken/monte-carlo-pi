@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from "chart.js";
 import Link from "next/link";
+import Image from "next/image";
 
 ChartJS.register(
   CategoryScale,
@@ -286,6 +287,15 @@ export default function Home() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white flex-col py-8">
+      <div className="absolute top-4 right-4">
+        <Link
+          href="https://github.com/TetieWasTaken/monte-carlo-pi"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image src="/github.svg" alt="GitHub Logo" width={32} height={32} />
+        </Link>
+      </div>
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-title">Monte Carlo Pi</h1>
         <p className="text-lg">
