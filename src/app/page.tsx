@@ -14,6 +14,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
+import Link from "next/link";
 
 ChartJS.register(
   CategoryScale,
@@ -94,6 +95,8 @@ export default function Home() {
           display: true,
           text: "Points",
         },
+        min: 0,
+        max: piData.length * Math.floor(simulationIterations / 50),
       },
       y: {
         title: {
@@ -153,7 +156,7 @@ export default function Home() {
           newPoints.push(point);
           setPoints([...newPoints]);
 
-          if (i % (iterations / 50) === 0) {
+          if (i % Math.floor(iterations / 50) === 0) {
             setPiData((data) => {
               const pointsInsideCircle = newPoints.filter((p) =>
                 p.isInsideCircle
@@ -235,14 +238,14 @@ export default function Home() {
             }}
           />{" "}
           using the{" "}
-          <a
+          <Link
             href="https://en.wikipedia.org/wiki/Monte_Carlo_method"
             className="text-red-400 underline"
             target="_blank"
             rel="noopener noreferrer"
           >
             Monte Carlo method
-          </a>
+          </Link>
         </p>
       </div>
       <div className="flex relative">
