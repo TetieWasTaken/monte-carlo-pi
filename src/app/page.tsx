@@ -363,17 +363,52 @@ export default function Home() {
             />
           </p>
         </div>
-        <div
-          ref={containerRef}
-          className="relative"
-          style={{
-            width: "66.666vw",
-            height: "66.666vw",
-            maxWidth: "66.666vh",
-            maxHeight: "66.666vh",
-          }}
-        >
-          <canvas ref={canvasRef} />
+        <div className="flex flex-col items-center">
+          <div
+            ref={containerRef}
+            className="relative"
+            style={{
+              width: "66.666vw",
+              height: "66.666vw",
+              maxWidth: "66.666vh",
+              maxHeight: "66.666vh",
+            }}
+          >
+            <canvas ref={canvasRef} />
+          </div>
+          <div
+            className="mt-8 flex justify-center w-full"
+            style={{ maxWidth: "66.666vh" }}
+          >
+            <button
+              className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none mr-4"
+              onClick={startSimulation}
+            >
+              Start
+            </button>
+            <input
+              type="number"
+              placeholder="points (1000)"
+              className="p-2 border border-gray-300 rounded bg-gray-800 text-white w-1/3 focus:outline-none"
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                setIterations(value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  startSimulation();
+                }
+              }}
+            />
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none ml-4"
+              onClick={() => {
+                setSimulationMode((mode) => (mode + 1) % 3);
+              }}
+            >
+              {SimulationModeLabels[simulationMode]}
+            </button>
+          </div>
         </div>
         <div className="hidden xl:block ml-8 p-4 rounded w-96">
           {parseFloat(estimatedPi) > 0 && (
@@ -467,39 +502,6 @@ export default function Home() {
             button to start the simulation.
           </p>
         </div>
-      </div>
-      <div
-        className="mt-8 flex justify-center w-full"
-        style={{ maxWidth: "66.666vh" }}
-      >
-        <button
-          className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none mr-4"
-          onClick={startSimulation}
-        >
-          Start
-        </button>
-        <input
-          type="number"
-          placeholder="points (1000)"
-          className="p-2 border border-gray-300 rounded bg-gray-800 text-white w-1/3 focus:outline-none"
-          onChange={(e) => {
-            const value = parseInt(e.target.value, 10);
-            setIterations(value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              startSimulation();
-            }
-          }}
-        />
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none ml-4"
-          onClick={() => {
-            setSimulationMode((mode) => (mode + 1) % 3);
-          }}
-        >
-          {SimulationModeLabels[simulationMode]}
-        </button>
       </div>
       <div className="xl:hidden mt-8 p-4 rounded w-full max-w-2xl">
         {parseFloat(estimatedPi) > 0 && (
