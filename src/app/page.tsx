@@ -100,8 +100,8 @@ export default function Home() {
           display: true,
           text: "Approximated π",
         },
-        min: 3,
-        max: 3.3,
+        min: 2.9,
+        max: 3.4,
       },
     },
     animation: {
