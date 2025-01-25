@@ -53,7 +53,6 @@ export default function Home() {
     SimulationMode.Automatic,
   );
   const [piData, setPiData] = useState<number[]>([]);
-  // Add a ref to track points
   const pointsRef = useRef<Point[]>(points);
   useEffect(() => {
     pointsRef.current = points;
