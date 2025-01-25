@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Point } from "@/types";
 import katex from "katex";
 import { Line } from "react-chartjs-2";
@@ -53,7 +53,7 @@ export default function Home() {
   );
   const [piData, setPiData] = useState<number[]>([]);
 
-  const piChart = {
+  const piChart = useMemo(() => ({
     labels: piData.map((_, i) => i * Math.floor(simulationIterations / 50)),
     datasets: [
       {
@@ -74,9 +74,9 @@ export default function Home() {
         fill: false,
       },
     ],
-  };
+  }), [piData, simulationIterations]);
 
-  const piChartOptions = {
+  const piChartOptions = useMemo(() => ({
     responsive: true,
     plugins: {
       legend: {
@@ -92,7 +92,7 @@ export default function Home() {
         type: "linear" as const,
         title: {
           display: true,
-          text: "Iteration",
+          text: "Points",
         },
       },
       y: {
@@ -107,26 +107,29 @@ export default function Home() {
     animation: {
       duration: 0,
     },
-  };
+  }), [piData, simulationIterations]);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simulationId = useRef<number | null>(null);
 
-  const drawPoint = (ctx: CanvasRenderingContext2D, point: Point) => {
-    const { x, y, isInsideCircle } = point;
-    ctx.fillStyle = isInsideCircle ? "#ff7f7f" : "#7f7fff";
-    ctx.beginPath();
-    ctx.arc(
-      x * 500,
-      y * 500,
-      Math.max(1, Math.min(5, 4000 / simulationIterations)),
-      0,
-      2 * Math.PI,
-    );
-    ctx.fill();
-  };
+  const drawPoint = useCallback(
+    (ctx: CanvasRenderingContext2D, point: Point) => {
+      const { x, y, isInsideCircle } = point;
+      ctx.fillStyle = isInsideCircle ? "#ff7f7f" : "#7f7fff";
+      ctx.beginPath();
+      ctx.arc(
+        x * 500,
+        y * 500,
+        Math.max(1, Math.min(5, 4000 / simulationIterations)),
+        0,
+        2 * Math.PI,
+      );
+      ctx.fill();
+    },
+    [simulationIterations],
+  );
 
-  const startSimulation = async (): Promise<void> => {
+  const startSimulation = useCallback(async (): Promise<void> => {
     if (simulationId.current !== null) {
       cancelAnimationFrame(simulationId.current);
     }
@@ -188,7 +191,7 @@ export default function Home() {
         }
       }
     }
-  };
+  }, [drawPoint, iterations, simulationMode]);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -208,12 +211,14 @@ export default function Home() {
         ctx.stroke();
       }
     }
-  }, [points]);
+  }, [points, drawPoint]);
 
   const pointsInsideCircle = points.filter((p) => p.isInsideCircle).length;
-  const estimatedPi = (4 * (pointsInsideCircle / points.length)).toPrecision(
-    points.length.toString().length,
-  );
+  const estimatedPi = points.length > 0
+    ? (4 * (pointsInsideCircle / points.length)).toPrecision(
+      points.length.toString().length,
+    )
+    : "0";
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-900 text-white flex-col">
@@ -241,14 +246,17 @@ export default function Home() {
         </p>
       </div>
       <div className="flex relative">
-        <div className="absolute top-0 right-full mr-4 p-4 rounded w-80">
+        <div className="absolute top-0 right-full mr-4 p-4 rounded w-96">
           <p className="text-lg">
-            The Monte Carlo method is a statistical method that uses random
+            The Monte Carlo method is a statistical method that uses{" "}
+            <span className="text-red-400 font-medium">random</span>{" "}
             sampling to estimate numerical results.
           </p>
           <p className="text-lg mt-4">
             In this simulation, a circle is inscribed in a quadrant. The ratio
-            between the area of the circle and the area of the square is
+            between the area of the circle and the{" "}
+            <span className="text-red-400 font-medium">area</span>{" "}
+            of the square is
             <span
               className="text-white"
               dangerouslySetInnerHTML={{
@@ -259,8 +267,9 @@ export default function Home() {
               }}
             />
             This means we can approximate pi by generating random points in the
-            quadrant and calculating the ratio of points inside the circle to
-            the total number of points.
+            quadrant and calculating the{" "}
+            <span className="text-red-400 font-medium">ratio</span>{" "}
+            of points inside the circle to the total number of points.
             <span
               className="text-white"
               dangerouslySetInnerHTML={{
@@ -293,25 +302,26 @@ export default function Home() {
         <canvas ref={canvasRef} width="500" height="500" />
         <div className="absolute top-0 left-full ml-4 p-4 rounded w-80">
           <p className="text-lg">
-            Total points: <span className="text-white">{points.length}</span>
+            Total points:{" "}
+            <span className="text-white font-medium">{points.length}</span>
           </p>
           <p className="text-lg">
             Points inside circle:{" "}
-            <span className="text-[#ff7f7f]">
+            <span className="text-[#ff7f7f] font-medium">
               {pointsInsideCircle}
             </span>
           </p>
           <p className="text-lg">
             Points outside circle:{" "}
-            <span className="text-[#7f7fff]">
+            <span className="text-[#7f7fff] font-medium">
               {points.length - pointsInsideCircle}
             </span>
           </p>
           {!isNaN(parseFloat(estimatedPi)) && (
             <>
               <p className="text-lg">
-                Estimated value of Pi:{" "}
-                <span className="text-[#7fff7f]">
+                Approximated value of Pi:{" "}
+                <span className="text-[#7fff7f] font-medium">
                   {estimatedPi}
                 </span>
               </p>
@@ -339,7 +349,7 @@ export default function Home() {
                     ? "text-[#7fff7f]"
                     : Math.abs(Math.PI - parseFloat(estimatedPi)) < 0.1
                     ? "text-[#ffff7f]"
-                    : "text-[#ff7f7f]"}
+                    : "text-[#ff7f7f]" + " font-medium"}
                 >
                   {Math.abs(Math.PI - parseFloat(estimatedPi)).toPrecision(
                     points.length.toString().length,
@@ -364,11 +374,16 @@ export default function Home() {
         </button>
         <input
           type="number"
-          placeholder="iterations (1000)"
+          placeholder="points (1000)"
           className="p-2 border border-gray-300 rounded bg-gray-800 text-white"
-          value={iterations.toString()}
           onChange={(e) => {
-            setIterations(parseInt(e.target.value, 10));
+            const value = parseInt(e.target.value, 10);
+            setIterations(value);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              startSimulation();
+            }
           }}
         />
         <button
