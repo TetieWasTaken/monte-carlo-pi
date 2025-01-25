@@ -5,7 +5,6 @@ import { Point } from "@/types";
 
 export default function Home() {
   const [points, setPoints] = useState<Point[]>([]);
-  const [openSidebar, setOpenSidebar] = useState(false);
   const [iterations, setIterations] = useState(1000);
 
   const randomPoint = (): Point => {
@@ -15,13 +14,13 @@ export default function Home() {
     return { x, y, isInsideCircle };
   };
 
-  const startSimulation = (): void => {
-    setOpenSidebar(true);
+  const startSimulation = async (): Promise<void> => {
     const newPoints: Point[] = [];
     for (let i = 0; i < iterations; i++) {
       newPoints.push(randomPoint());
+      setPoints([...newPoints]);
+      await new Promise((resolve) => setTimeout(resolve, 1000 / iterations));
     }
-    setPoints(newPoints);
   };
 
   return (
@@ -60,23 +59,32 @@ export default function Home() {
           ))}
         </svg>
         <div
-          className={`absolute top-0 left-full ml-4 transition-all duration-500 ease-in-out transform ${
-            openSidebar ? "opacity-100 max-w-l" : "opacity-0 max-w-0"
-          } overflow-hidden bg-gray-800 p-4 rounded`}
+          className={`absolute top-0 left-full ml-4 p-4 rounded w-64`}
         >
           <p className="text-lg">
-            Points inside circle: {points.filter(({ isInsideCircle }) =>
-              isInsideCircle
-            ).length}
+            Total points: <span className="text-white">{points.length}</span>
+          </p>
+          <p className="text-lg">
+            Points inside circle:{" "}
+            <span className="text-[#ff7f7f]">
+              {points.filter((p) => p.isInsideCircle).length}
+            </span>
           </p>
           <p className="text-lg">
             Points outside circle:{" "}
-            {points.filter(({ isInsideCircle }) => !isInsideCircle).length}
+            <span className="text-[#7f7fff]">
+              {points.filter((p) => !p.isInsideCircle).length}
+            </span>
           </p>
           <p className="text-lg">
-            Pi estimation:{" "}
-            {4 * points.filter(({ isInsideCircle }) => isInsideCircle).length /
-              points.length}
+            Estimated value of Pi:{" "}
+            <span className="text-[#7fff7f]">
+              {(4 * (points.filter((p) =>
+                p.isInsideCircle
+              ).length / points.length)).toPrecision(
+                points.length.toString().length,
+              )}
+            </span>
           </p>
         </div>
       </div>
