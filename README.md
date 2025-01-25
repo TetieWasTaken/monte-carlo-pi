@@ -1,36 +1,19 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+#### Approximate π using the [Monte Carlo method](https://en.wikipedia.org/wiki/Monte_Carlo_method).
 
-## Getting Started
+## About
+> This tool approximates π using the Monte Carlo method. The Monte Carlo method is a statistical method that uses random sampling to estimate numerical results. In this simulation, a circle is inscribed in a quadrant. The ratio between the area of the circle and the area of the square is π/4. By randomly selecting points in the quadrant, the ratio of points inside the circle to the total number of points is used to approximate π.
+###### From [WEBSITE HERE](https://google.com)
 
-First, run the development server:
+## Usage
+> 1. Enter the number of points to generate using the input field.
+> 2. (optional) Select the simulation mode.
+>    - Simulate: generate points one by one
+>    - Instant: generate everything at once
+>    - Automatic: choose for me
+> 3. Click the Start button to start the simulation.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Features
+- Approximate π using the Monte Carlo method
+- Customise the number of points to generate
+- Choose between three simulation modes
+- Responsive design
