@@ -6,6 +6,7 @@ import { Point } from "@/types";
 export default function Home() {
   const [points, setPoints] = useState<Point[]>([]);
   const [iterations, setIterations] = useState(1000);
+  const [simulationIterations, setSimulationIterations] = useState(0);
 
   const randomPoint = (): Point => {
     const x = Math.random();
@@ -15,6 +16,7 @@ export default function Home() {
   };
 
   const startSimulation = async (): Promise<void> => {
+    setSimulationIterations(iterations);
     const newPoints: Point[] = [];
     for (let i = 0; i < iterations; i++) {
       newPoints.push(randomPoint());
@@ -33,6 +35,15 @@ export default function Home() {
       </div>
       <div className="flex relative">
         <svg width="500" height="500">
+          {points.map(({ x, y, isInsideCircle }) => (
+            <circle
+              cx={x * 500}
+              cy={y * 500}
+              r={Math.max(1, Math.min(5, 900 / simulationIterations))}
+              fill={isInsideCircle ? "#ff7f7f" : "#7f7fff"}
+              key={`${x}-${y}`}
+            />
+          ))}
           <rect
             x="0"
             y="0"
@@ -48,15 +59,6 @@ export default function Home() {
             stroke="white"
             strokeWidth="3"
           />
-          {points.map(({ x, y, isInsideCircle }) => (
-            <circle
-              cx={x * 500}
-              cy={y * 500}
-              r="5"
-              fill={isInsideCircle ? "#ff7f7f" : "#7f7fff"}
-              key={`${x}-${y}`}
-            />
-          ))}
         </svg>
         <div
           className={`absolute top-0 left-full ml-4 p-4 rounded w-64`}
