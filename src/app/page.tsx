@@ -1,21 +1,36 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Point } from "@/types";
+
+const randomPoint = (): Point => {
+  const x = Math.random();
+  const y = Math.random();
+  const isInsideCircle = x ** 2 + (1 - y) ** 2 <= 1;
+  return { x, y, isInsideCircle };
+};
 
 export default function Home() {
   const [points, setPoints] = useState<Point[]>([]);
   const [iterations, setIterations] = useState(1000);
   const [simulationIterations, setSimulationIterations] = useState(0);
 
-  const randomPoint = (): Point => {
-    const x = Math.random();
-    const y = Math.random();
-    const isInsideCircle = x ** 2 + (1 - y) ** 2 <= 1;
-    return { x, y, isInsideCircle };
-  };
-
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const simulationId = useRef<number | null>(null);
+
+  const drawPoint = (ctx: CanvasRenderingContext2D, point: Point) => {
+    const { x, y, isInsideCircle } = point;
+    ctx.fillStyle = isInsideCircle ? "#ff7f7f" : "#7f7fff";
+    ctx.beginPath();
+    ctx.arc(
+      x * 500,
+      y * 500,
+      Math.max(2, Math.min(5, 5000 / simulationIterations)),
+      0,
+      2 * Math.PI,
+    );
+    ctx.fill();
+  };
 
   const startSimulation = async (): Promise<void> => {
     if (simulationId.current !== null) {
@@ -27,14 +42,41 @@ export default function Home() {
     let i = 0;
     const simulate = () => {
       if (i < iterations) {
-        newPoints.push(randomPoint());
+        const point = randomPoint();
+        newPoints.push(point);
         setPoints([...newPoints]);
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext("2d");
+          if (ctx) {
+            drawPoint(ctx, point);
+          }
+        }
         i++;
         simulationId.current = requestAnimationFrame(simulate);
       }
     };
     simulate();
   };
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, 500, 500);
+
+        points.forEach((point) => drawPoint(ctx, point));
+
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = "#ffffff";
+        ctx.strokeRect(0, 0, 500, 500);
+
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 500, 500, Math.PI / 2, 0);
+        ctx.stroke();
+      }
+    }
+  }, [points]);
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-900 text-white flex-col">
@@ -45,35 +87,8 @@ export default function Home() {
         </p>
       </div>
       <div className="flex relative">
-        <svg width="500" height="500">
-          {points.map(({ x, y, isInsideCircle }) => (
-            <circle
-              cx={x * 500}
-              cy={y * 500}
-              r={Math.max(1, Math.min(5, 900 / simulationIterations))}
-              fill={isInsideCircle ? "#ff7f7f" : "#7f7fff"}
-              key={`${x}-${y}`}
-            />
-          ))}
-          <rect
-            x="0"
-            y="0"
-            width="500"
-            height="500"
-            fill="none"
-            stroke="white"
-            strokeWidth="3"
-          />
-          <path
-            d="M 500 500 A 500 500 0 0 0 0 0"
-            fill="none"
-            stroke="white"
-            strokeWidth="3"
-          />
-        </svg>
-        <div
-          className={`absolute top-0 left-full ml-4 p-4 rounded w-64`}
-        >
+        <canvas ref={canvasRef} width="500" height="500" />
+        <div className="absolute top-0 left-full ml-4 p-4 rounded w-64">
           <p className="text-lg">
             Total points: <span className="text-white">{points.length}</span>
           </p>
@@ -104,7 +119,7 @@ export default function Home() {
       <div className="mt-8">
         <button
           className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none"
-          onClick={() => startSimulation()}
+          onClick={startSimulation}
         >
           Start
         </button>
@@ -113,7 +128,7 @@ export default function Home() {
           placeholder="iterations (1000)"
           className="ml-4 p-2 border border-gray-300 rounded bg-gray-800 text-white"
           value={iterations}
-          onChange={(e) => setIterations(parseInt(e.target.value))}
+          onChange={(e) => setIterations(parseInt(e.target.value, 10))}
         />
       </div>
     </div>
