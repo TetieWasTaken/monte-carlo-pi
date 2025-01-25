@@ -258,8 +258,10 @@ export default function Home() {
           type="number"
           placeholder="iterations (1000)"
           className="p-2 border border-gray-300 rounded bg-gray-800 text-white"
-          value={iterations}
-          onChange={(e) => setIterations(parseInt(e.target.value, 10))}
+          value={iterations.toString()}
+          onChange={(e) => {
+            setIterations(parseInt(e.target.value, 10));
+          }}
         />
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none ml-4"
