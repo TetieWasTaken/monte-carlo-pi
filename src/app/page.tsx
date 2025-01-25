@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Point } from "@/types";
 
 export default function Home() {
@@ -15,14 +15,25 @@ export default function Home() {
     return { x, y, isInsideCircle };
   };
 
+  const simulationId = useRef<number | null>(null);
+
   const startSimulation = async (): Promise<void> => {
+    if (simulationId.current !== null) {
+      cancelAnimationFrame(simulationId.current);
+    }
+
     setSimulationIterations(iterations);
     const newPoints: Point[] = [];
-    for (let i = 0; i < iterations; i++) {
-      newPoints.push(randomPoint());
-      setPoints([...newPoints]);
-      await new Promise((resolve) => setTimeout(resolve, 1000 / iterations));
-    }
+    let i = 0;
+    const simulate = () => {
+      if (i < iterations) {
+        newPoints.push(randomPoint());
+        setPoints([...newPoints]);
+        i++;
+        simulationId.current = requestAnimationFrame(simulate);
+      }
+    };
+    simulate();
   };
 
   return (
