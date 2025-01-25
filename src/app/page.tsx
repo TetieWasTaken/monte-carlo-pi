@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Point } from "@/types";
+import katex from "katex";
 
 const randomPoint = (): Point => {
   const x = Math.random();
@@ -78,6 +79,11 @@ export default function Home() {
     }
   }, [points]);
 
+  const pointsInsideCircle = points.filter((p) => p.isInsideCircle).length;
+  const estimatedPi = (4 * (pointsInsideCircle / points.length)).toPrecision(
+    points.length.toString().length,
+  );
+
   return (
     <div className="flex justify-center items-center h-screen bg-gray-900 text-white flex-col">
       <div className="mb-8 text-center">
@@ -95,24 +101,31 @@ export default function Home() {
           <p className="text-lg">
             Points inside circle:{" "}
             <span className="text-[#ff7f7f]">
-              {points.filter((p) => p.isInsideCircle).length}
+              {pointsInsideCircle}
             </span>
           </p>
           <p className="text-lg">
             Points outside circle:{" "}
             <span className="text-[#7f7fff]">
-              {points.filter((p) => !p.isInsideCircle).length}
+              {points.length - pointsInsideCircle}
             </span>
           </p>
           <p className="text-lg">
             Estimated value of Pi:{" "}
             <span className="text-[#7fff7f]">
-              {(4 * (points.filter((p) =>
-                p.isInsideCircle
-              ).length / points.length)).toPrecision(
-                points.length.toString().length,
-              )}
+              {estimatedPi}
             </span>
+          </p>
+          <p className="text-lg mt-4">
+            <span
+              className="text-white"
+              dangerouslySetInnerHTML={{
+                __html: katex.renderToString(
+                  `\\pi \\approx 4 \\cdot \\frac{r}{n} = 4 \\cdot \\frac{${pointsInsideCircle}}{${points.length}}= \\color{#7fff7f} ${estimatedPi}`,
+                  { throwOnError: false, displayMode: true, output: "mathml" },
+                ),
+              }}
+            />
           </p>
         </div>
       </div>
