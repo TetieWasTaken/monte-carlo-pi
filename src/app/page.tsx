@@ -3,6 +3,27 @@
 import { useEffect, useRef, useState } from "react";
 import { Point } from "@/types";
 import katex from "katex";
+import { Line } from "react-chartjs-2";
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
 const randomPoint = (): Point => {
   const x = Math.random();
@@ -30,6 +51,63 @@ export default function Home() {
   const [simulationMode, setSimulationMode] = useState(
     SimulationMode.Automatic,
   );
+  const [piData, setPiData] = useState<number[]>([]);
+
+  const piChart = {
+    labels: piData.map((_, i) => i * Math.floor(simulationIterations / 50)),
+    datasets: [
+      {
+        label: "Approx. π",
+        pointRadius: 0,
+        data: piData,
+        borderColor: "#7fff7f",
+        backgroundColor: "rgba(0, 255, 0, 0.2)",
+        fill: false,
+      },
+      {
+        label: "π",
+        pointRadius: 0,
+        data: piData.map(() => Math.PI),
+        borderColor: "#ff7f7f",
+        backgroundColor: "rgba(255, 0, 0, 0.2)",
+        borderDash: [10, 5],
+        fill: false,
+      },
+    ],
+  };
+
+  const piChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+        text: "Convergence of π Approximation",
+      },
+    },
+    scales: {
+      x: {
+        type: "linear" as const,
+        title: {
+          display: true,
+          text: "Iteration",
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: "Approximated π",
+        },
+        min: 3,
+        max: 3.3,
+      },
+    },
+    animation: {
+      duration: 0,
+    },
+  };
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simulationId = useRef<number | null>(null);
@@ -54,6 +132,7 @@ export default function Home() {
     }
 
     setPoints([]);
+    setPiData([]);
     setSimulationIterations(iterations);
     const newPoints: Point[] = [];
     let i = 0;
@@ -70,6 +149,21 @@ export default function Home() {
           const point = randomPoint();
           newPoints.push(point);
           setPoints([...newPoints]);
+
+          if (i % (iterations / 50) === 0) {
+            setPiData((data) => {
+              const pointsInsideCircle = newPoints.filter((p) =>
+                p.isInsideCircle
+              )
+                .length;
+              const estimatedPi = (
+                4 *
+                (pointsInsideCircle / newPoints.length)
+              ).toPrecision(newPoints.length.toString().length);
+              return [...data, parseFloat(estimatedPi)];
+            });
+          }
+
           if (canvasRef.current) {
             const ctx = canvasRef.current.getContext("2d");
             if (ctx) {
@@ -126,7 +220,16 @@ export default function Home() {
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-title">Monte Carlo Pi</h1>
         <p className="text-lg">
-          Approximate pi using the{" "}
+          Approximate{" "}
+          <span
+            className="text-white"
+            dangerouslySetInnerHTML={{
+              __html: katex.renderToString("\\pi", {
+                output: "mathml",
+              }),
+            }}
+          />{" "}
+          using the{" "}
           <a
             href="https://en.wikipedia.org/wiki/Monte_Carlo_method"
             className="text-red-400 underline"
@@ -243,6 +346,11 @@ export default function Home() {
                   )}
                 </span>
               </p>
+              {piData.length > 0 && (
+                <div className="mt-4">
+                  <Line data={piChart} options={piChartOptions} />
+                </div>
+              )}
             </>
           )}
         </div>
