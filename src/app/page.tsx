@@ -15,7 +15,7 @@ export default function Home() {
   const [points, setPoints] = useState<Point[]>([]);
   const [iterations, setIterations] = useState(1000);
   const [simulationIterations, setSimulationIterations] = useState(0);
-  const [skipSimulation, setSkipSimulation] = useState(true);
+  const [skipSimulation, setSkipSimulation] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simulationId = useRef<number | null>(null);
@@ -106,7 +106,15 @@ export default function Home() {
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-title">Monte Carlo Pi</h1>
         <p className="text-lg">
-          Testing testing
+          Approximate pi using the{" "}
+          <a
+            href="https://en.wikipedia.org/wiki/Monte_Carlo_method"
+            className="text-red-400 underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Monte Carlo method
+          </a>
         </p>
       </div>
       <div className="flex relative">
