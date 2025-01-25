@@ -15,6 +15,7 @@ export default function Home() {
   const [points, setPoints] = useState<Point[]>([]);
   const [iterations, setIterations] = useState(1000);
   const [simulationIterations, setSimulationIterations] = useState(0);
+  const [skipSimulation, setSkipSimulation] = useState(true);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simulationId = useRef<number | null>(null);
@@ -38,25 +39,41 @@ export default function Home() {
       cancelAnimationFrame(simulationId.current);
     }
 
+    setPoints([]);
     setSimulationIterations(iterations);
     const newPoints: Point[] = [];
     let i = 0;
-    const simulate = () => {
-      if (i < iterations) {
-        const point = randomPoint();
-        newPoints.push(point);
-        setPoints([...newPoints]);
-        if (canvasRef.current) {
-          const ctx = canvasRef.current.getContext("2d");
-          if (ctx) {
-            drawPoint(ctx, point);
-          }
-        }
-        i++;
-        simulationId.current = requestAnimationFrame(simulate);
+
+    if (skipSimulation) {
+      for (i = 0; i < iterations; i++) {
+        newPoints.push(randomPoint());
       }
-    };
-    simulate();
+      setPoints(newPoints);
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, 500, 500);
+          newPoints.forEach((point) => drawPoint(ctx, point));
+        }
+      }
+    } else {
+      const simulate = () => {
+        if (i < iterations) {
+          const point = randomPoint();
+          newPoints.push(point);
+          setPoints([...newPoints]);
+          if (canvasRef.current) {
+            const ctx = canvasRef.current.getContext("2d");
+            if (ctx) {
+              drawPoint(ctx, point);
+            }
+          }
+          i++;
+          simulationId.current = requestAnimationFrame(simulate);
+        }
+      };
+      simulate();
+    }
   };
 
   useEffect(() => {
@@ -139,10 +156,16 @@ export default function Home() {
         <input
           type="number"
           placeholder="iterations (1000)"
-          className="ml-4 p-2 border border-gray-300 rounded bg-gray-800 text-white"
+          className="m-4 mt-0 p-2 border border-gray-300 rounded bg-gray-800 text-white"
           value={iterations}
           onChange={(e) => setIterations(parseInt(e.target.value, 10))}
         />
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none"
+          onClick={() => setSkipSimulation((prev) => !prev)}
+        >
+          Skip
+        </button>
       </div>
     </div>
   );
