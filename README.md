@@ -23,7 +23,7 @@
 - Choose between three simulation modes
 - Responsive design (works on all devices)
 
-![primary](/primary.gif)
+![primary](/images/primary.gif)
 
 ## Legal & Disclaimer
 This tool is provided as is without any guarantees or warranty. Use of the product by a user is at the user’s risk. This project is licensed under the MIT License. For more information, see the [LICENSE](https://github.com/TetieWasTaken/monte-carlo-pi/blob/main/LICENSE) file. AI has been used for reviewing and improving the codebase.
